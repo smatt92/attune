@@ -75,7 +75,9 @@ dependencies {
 
     testImplementation(kotlin("test-junit"))
 
-    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+    // Pin to the version AGP's consistent resolution already uses for :app (Compose/lifecycle
+    // bring 1.7.3) — a newer version fails dependency resolution on the androidTest classpath.
+    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
     androidTestImplementation("androidx.test:rules:1.6.1")
