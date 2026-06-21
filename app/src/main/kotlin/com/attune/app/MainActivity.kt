@@ -6,13 +6,9 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,14 +22,19 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.attune.app.flow.AttuneFlow
+import com.attune.app.flow.PlanSession
 import com.attune.app.onboarding.OnboardingScreen
+import com.attune.app.settings.AndroidSettingsContext
 import com.attune.app.settings.PermissionStatus
+import com.attune.core.ClaudeIntentParser
+import com.attune.tools.AttuneTools
 
 /**
- * App entry point for the M3 milestone. Routes between onboarding (when the performance grant is
- * missing) and the main loop placeholder (M5 fills in the real intent → confirm → apply → undo
- * flow). Permission state is re-read whenever the screen resumes so a grant performed over adb is
- * detected without a restart. Nothing here crashes when the permission is absent.
+ * App entry point. Routes between onboarding (when the performance grant is missing) and the
+ * end-to-end loop (AttuneFlow: intent → previewed plan → approve → apply → one-tap undo). Permission
+ * state is re-read whenever the screen resumes so a grant performed over adb is detected without a
+ * restart. Nothing here crashes when the permission is absent.
  */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,22 +73,14 @@ private fun AttuneApp() {
             onContinue = { continuedPastOnboarding = true },
         )
     } else {
-        MainPlaceholder()
-    }
-}
-
-@Composable
-private fun MainPlaceholder() {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(text = "Attune", style = MaterialTheme.typography.headlineMedium)
-        Text(
-            text = "Describe how you want your phone to feel.",
-            style = MaterialTheme.typography.bodyMedium,
-        )
+        val session = remember {
+            PlanSession(
+                parser = ClaudeIntentParser(apiKey = BuildConfig.ANTHROPIC_API_KEY),
+                registry = AttuneTools.registry(),
+                settings = AndroidSettingsContext(context.contentResolver),
+            )
+        }
+        AttuneFlow(session)
     }
 }
 
