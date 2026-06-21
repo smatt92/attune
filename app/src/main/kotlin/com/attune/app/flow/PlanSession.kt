@@ -1,5 +1,6 @@
 package com.attune.app.flow
 
+import com.attune.core.ConfigAction
 import com.attune.core.ExecutionResult
 import com.attune.core.IntentParser
 import com.attune.core.IntentPlan
@@ -7,6 +8,16 @@ import com.attune.core.PlanExecutor
 import com.attune.core.SettingsContext
 import com.attune.core.ToolRegistry
 import com.attune.core.ToolSnapshot
+
+/** A plain-language preview of one proposed change, including its current → target values. */
+data class ActionPreview(
+    val action: ConfigAction,
+    val beforeRaw: String?, // current value of the setting (read via the tool's snapshot)
+    val afterRaw: String?,  // target value the action would write
+    val rawSettingKey: String?, // the underlying Settings key, for the "what's this?" reveal
+) {
+    val alreadySet: Boolean get() = beforeRaw != null && beforeRaw == afterRaw
+}
 
 /**
  * The deterministic core of the M5 loop, deliberately free of Compose so it can be driven straight
@@ -21,12 +32,33 @@ import com.attune.core.ToolSnapshot
 class PlanSession(
     private val parser: IntentParser,
     private val registry: ToolRegistry,
-    settings: SettingsContext,
+    private val settings: SettingsContext,
 ) {
     private val executor = PlanExecutor(settings, registry.toolsById)
 
     /** Side-effect free: ask the model for a proposed plan grounded in the registered tools. */
     suspend fun propose(intent: String): IntentPlan = parser.parse(intent, registry.descriptors)
+
+    /**
+     * Current → target preview for each action, read via the tool's side-effect-free snapshot().
+     * Lets the confirm sheet show "before → after" and flag no-ops as "already set". Reads settings,
+     * so call off the UI thread (the flow does this on Dispatchers.IO right after propose()).
+     */
+    fun preview(plan: IntentPlan): List<ActionPreview> = plan.actions.map { action ->
+        val tool = registry.tool(action.toolId)
+        val snapshot = tool?.snapshot(settings)
+        val key = snapshot?.previousState?.keys?.firstOrNull()
+        ActionPreview(
+            action = action,
+            beforeRaw = key?.let { snapshot.previousState[it] },
+            afterRaw = action.params.values.firstOrNull(),
+            rawSettingKey = key,
+        )
+    }
+
+    /** Permissions the action's tool needs — lets the sheet route to onboarding before applying. */
+    fun requiredPermissions(action: ConfigAction): List<String> =
+        registry.tool(action.toolId)?.requiredPermissions ?: emptyList()
 
     /**
      * Apply only the actions the user left included. [excludedIndices] are positions into

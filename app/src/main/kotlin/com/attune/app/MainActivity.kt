@@ -3,7 +3,10 @@ package com.attune.app
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -70,6 +73,7 @@ private fun AttuneApp() {
             status = status,
             onRecheck = { status = PermissionStatus.read(context) },
             onCopyCommand = { command -> copyToClipboard(context, command) },
+            onEnableWriteSettings = { openWriteSettings(context) },
             onContinue = { continuedPastOnboarding = true },
         )
     } else {
@@ -80,11 +84,19 @@ private fun AttuneApp() {
                 settings = AndroidSettingsContext(context.contentResolver),
             )
         }
-        AttuneFlow(session)
+        // If a grant is missing at apply time, route back to onboarding instead of failing silently.
+        AttuneFlow(session = session, onNeedPermission = { continuedPastOnboarding = false })
     }
 }
 
 private fun copyToClipboard(context: Context, text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     clipboard.setPrimaryClip(ClipData.newPlainText("Attune adb command", text))
+}
+
+/** Open the system "Modify system settings" page for Attune (the Comfort/WRITE_SETTINGS tier). */
+private fun openWriteSettings(context: Context) {
+    val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.parse("package:${context.packageName}"))
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
 }
