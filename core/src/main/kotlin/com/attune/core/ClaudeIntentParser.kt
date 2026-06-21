@@ -85,7 +85,8 @@ class ClaudeIntentParser(
     private fun systemPrompt(tools: List<ToolDescriptor>): String {
         val catalog = tools.joinToString("\n") { d ->
             val params = d.params.entries.joinToString(", ") { (name, desc) -> "$name ($desc)" }
-            "- ${d.id}: ${d.description}" + if (params.isNotBlank()) " | params: $params" else ""
+            val tier = if (d.requiredPermissions.isEmpty()) "" else " [needs ${d.requiredPermissions.joinToString(", ")}]"
+            "- ${d.id}: ${d.description}$tier" + if (params.isNotBlank()) " | params: $params" else ""
         }
         return SYSTEM_PROMPT + "\n\nAvailable tools (you may use ONLY these ids):\n" + catalog
     }
@@ -113,7 +114,7 @@ class ClaudeIntentParser(
                             putJsonObject("humanLabel") { put("type", "string") }
                             putJsonObject("rationale") { put("type", "string") }
                         }
-                        putJsonArray("required") { add("toolId"); add("params"); add("humanLabel") }
+                        putJsonArray("required") { add("toolId"); add("params"); add("humanLabel"); add("rationale") }
                     }
                 }
                 putJsonObject("warnings") {
@@ -176,7 +177,9 @@ class ClaudeIntentParser(
             configuration changes. You may ONLY use the tools provided to you; never invent a toolId
             or a setting. Prefer the smallest plan that satisfies the intent. If the intent is
             ambiguous or you are unsure, include fewer actions and add a warning rather than guessing.
-            You never apply anything — you only propose. Return your plan by calling the emit_plan tool.
+            For EVERY action, include a short `rationale` that ties the change to the user's own words
+            (e.g. "you mentioned battery, so I'm lowering the screen timeout"). You never apply
+            anything — you only propose. Return your plan by calling the emit_plan tool.
         """.trimIndent()
     }
 }

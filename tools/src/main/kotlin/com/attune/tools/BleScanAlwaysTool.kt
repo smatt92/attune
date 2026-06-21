@@ -19,6 +19,7 @@ class BleScanAlwaysTool : ConfigTool {
         id = id,
         description = "Allow or stop apps from scanning for Bluetooth devices while Bluetooth is off.",
         params = mapOf("enabled" to "boolean: true to allow background BLE scanning, false to stop it"),
+        requiredPermissions = requiredPermissions,
     )
 
     private val key = "ble_scan_always_enabled"

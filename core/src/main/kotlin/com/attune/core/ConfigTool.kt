@@ -39,4 +39,5 @@ data class ToolDescriptor(
     val id: String,
     val description: String,
     val params: Map<String, String>,         // paramName -> "type: description"
+    val requiredPermissions: List<String> = emptyList(), // so parser/UI know the grant tier a plan needs
 )

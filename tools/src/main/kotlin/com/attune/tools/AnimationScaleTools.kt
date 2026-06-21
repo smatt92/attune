@@ -31,6 +31,7 @@ sealed class AnimationScaleTool(
         params = mapOf(
             PARAM to "string: speed multiplier — \"0.0\" off (instant), \"0.5\" fast, \"1.0\" default",
         ),
+        requiredPermissions = requiredPermissions,
     )
 
     final override fun preview(params: Map<String, String>): String =

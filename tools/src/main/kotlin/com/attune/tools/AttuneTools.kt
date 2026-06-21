@@ -5,17 +5,38 @@ import com.attune.core.ToolRegistry
 
 /**
  * The canonical list of tools Attune ships, in one place so the app, the executor, and the
- * intent-eval harness all agree on what exists. Phase 1 = the performance persona only.
+ * intent-eval harness all agree on what exists. Grouped by permission tier (not by user-facing
+ * persona — the intent vocabulary is owned separately and lives in the golden corpus).
+ *
+ * DEVICE-UNVERIFIED: every tool except the three animation scales is implemented + unit-tested but
+ * not yet confirmed to take effect on the S25 / One UI. See the per-file headers.
  */
 object AttuneTools {
 
-    /** The performance persona: the three live animation-scale controls. */
+    /** Animation scales — the live, instantly-visible performance controls (WRITE_SECURE_SETTINGS). */
     fun performanceTools(): List<ConfigTool> = listOf(
         WindowAnimationScaleTool(),
         TransitionAnimationScaleTool(),
         AnimatorDurationScaleTool(),
     )
 
-    /** All tools registered for Phase 1. `BleScanAlwaysTool` stays out — it is only a contract example. */
-    fun registry(): ToolRegistry = ToolRegistry(performanceTools())
+    /** Comfort/display controls — user-grantable WRITE_SETTINGS (no computer needed). */
+    fun writeSettingsTools(): List<ConfigTool> = listOf(
+        FontScaleTool(),
+        ScreenOffTimeoutTool(),
+        ScreenBrightnessModeTool(),
+        ScreenBrightnessTool(),
+        HapticFeedbackTool(),
+    )
+
+    /** Additional WRITE_SECURE_SETTINGS controls beyond the animation scales. */
+    fun secureSettingsTools(): List<ConfigTool> = listOf(
+        StayAwakeChargingTool(),
+    )
+
+    /** Everything registered for the app to compose plans from. */
+    fun allTools(): List<ConfigTool> = performanceTools() + writeSettingsTools() + secureSettingsTools()
+
+    /** The full registry. `BleScanAlwaysTool` stays out — it is only a contract example. */
+    fun registry(): ToolRegistry = ToolRegistry(allTools())
 }

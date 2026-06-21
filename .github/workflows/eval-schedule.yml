@@ -1,7 +1,7 @@
 name: Intent Eval (nightly)
 on:
   schedule:
-    - cron: "0 3 * * *"
+    - cron: "30 21 * * *"  # 03:00 IST (21:30 UTC)
   workflow_dispatch:
 jobs:
   call-eval:
