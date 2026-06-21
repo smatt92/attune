@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compose drives the UI; this is the base platform theme the manifest needs.
+         Material3 dynamic color is applied in Compose, not here. -->
+    <style name="Theme.Attune" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
