@@ -27,7 +27,40 @@ See `docs/SPEC.md` for the full design and `ARCHITECTURE.md` for the layer contr
 - `docs/`  — spec, project plan.
 
 ## Build
-This repo ships the **contracts and CI**, not a full Gradle/Android project yet — that gets generated against your local Android SDK (recommended: Claude Code, see `CLAUDE.md`). The Kotlin files here define the interfaces the implementation must satisfy.
+Multi-module Gradle project (`:core`, `:tools`, `:app`), JDK 17.
+
+- **JVM modules** (`:core`, `:tools`) build and test anywhere with a JDK — no Android SDK:
+  `./gradlew testDebugUnitTest`
+- **`:app`** is included only when an Android SDK is present (`ANDROID_HOME` or `local.properties`
+  with `sdk.dir`). Build/install it from Android Studio or the CLI on a machine with the SDK.
+
+### Phase 1: performance persona (Samsung S25 / One UI)
+The first intent family changes the three animation scales so the phone feels faster. Those are
+`Settings.Global` writes that need **`WRITE_SECURE_SETTINGS`** — a normal app can't hold it, so it
+is granted once over adb (a permanent one-time step on the S25, which can't be a system app):
+
+```bash
+adb shell pm grant com.attune.app android.permission.WRITE_SECURE_SETTINGS
+```
+
+The in-app onboarding explains this in plain language and detects when it's been granted.
+
+### Intent parser key
+`ClaudeIntentParser` reads the Anthropic key from `BuildConfig.ANTHROPIC_API_KEY`, sourced from
+`local.properties` (git-ignored) or the `ANTHROPIC_API_KEY` env var:
+
+```
+# local.properties (do NOT commit)
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+The intent-eval harness uses the key as a CI secret: `./gradlew :core:intentEval`.
+
+## ⚠️ Before you ship
+**Do not ship the Anthropic API key inside the APK — it is extractable.** The `local.properties`→
+`BuildConfig` path above is fine for this enthusiast spike only. Before any public/XDA release the
+key MUST move behind a proxy/backend, or the app must let users supply their own key. (We do not
+build the proxy in Phase 1 — this is the flag.)
 
 ## License
 MIT (see `LICENSE`). If you later integrate into a GPL ROM base, you may prefer Apache-2.0 for the explicit patent grant — switch before that step.

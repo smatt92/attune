@@ -1,7 +1,18 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+}
+
+// Anthropic key for the intent parser. For the Phase-1 spike it comes from local.properties
+// (git-ignored) or the environment — NEVER committed. See the README "Before you ship" note:
+// before any public release this key must move behind a proxy/backend or users supply their own.
+val anthropicApiKey: String = run {
+    val props = Properties()
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { props.load(it) }
+    props.getProperty("ANTHROPIC_API_KEY") ?: System.getenv("ANTHROPIC_API_KEY") ?: ""
 }
 
 android {
@@ -15,6 +26,9 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Read at runtime via BuildConfig.ANTHROPIC_API_KEY. Empty in CI / fresh clones.
+        buildConfigField("String", "ANTHROPIC_API_KEY", "\"$anthropicApiKey\"")
     }
 
     buildTypes {

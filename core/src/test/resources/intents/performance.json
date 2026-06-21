@@ -1,0 +1,37 @@
+{
+  "description": "Golden cases for the performance persona. The eval harness asserts the parser maps each phrasing to (at least) these tool actions. Animation scales: \"0.5\" fast, \"0.0\" off, \"1.0\" default.",
+  "cases": [
+    {
+      "intent": "make my phone feel faster",
+      "mustInclude": [
+        { "toolId": "ux.window_animation_scale", "params": { "scale": "0.5" } },
+        { "toolId": "ux.transition_animation_scale", "params": { "scale": "0.5" } },
+        { "toolId": "ux.animator_duration_scale", "params": { "scale": "0.5" } }
+      ]
+    },
+    {
+      "intent": "make my phone faster",
+      "mustInclude": [
+        { "toolId": "ux.window_animation_scale", "params": { "scale": "0.5" } },
+        { "toolId": "ux.transition_animation_scale", "params": { "scale": "0.5" } },
+        { "toolId": "ux.animator_duration_scale", "params": { "scale": "0.5" } }
+      ]
+    },
+    {
+      "intent": "turn off animations",
+      "mustInclude": [
+        { "toolId": "ux.window_animation_scale", "params": { "scale": "0.0" } },
+        { "toolId": "ux.transition_animation_scale", "params": { "scale": "0.0" } },
+        { "toolId": "ux.animator_duration_scale", "params": { "scale": "0.0" } }
+      ]
+    },
+    {
+      "intent": "put the animations back to normal",
+      "mustInclude": [
+        { "toolId": "ux.window_animation_scale", "params": { "scale": "1.0" } },
+        { "toolId": "ux.transition_animation_scale", "params": { "scale": "1.0" } },
+        { "toolId": "ux.animator_duration_scale", "params": { "scale": "1.0" } }
+      ]
+    }
+  ]
+}
