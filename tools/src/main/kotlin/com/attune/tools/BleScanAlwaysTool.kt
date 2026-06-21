@@ -2,6 +2,7 @@ package com.attune.tools
 
 import com.attune.core.ConfigTool
 import com.attune.core.SettingsContext
+import com.attune.core.ToolDescriptor
 import com.attune.core.ToolSnapshot
 
 /**
@@ -13,6 +14,12 @@ import com.attune.core.ToolSnapshot
 class BleScanAlwaysTool : ConfigTool {
     override val id = "privacy.ble_scan_always"
     override val requiredPermissions = listOf("android.permission.WRITE_SECURE_SETTINGS")
+
+    override val descriptor = ToolDescriptor(
+        id = id,
+        description = "Allow or stop apps from scanning for Bluetooth devices while Bluetooth is off.",
+        params = mapOf("enabled" to "boolean: true to allow background BLE scanning, false to stop it"),
+    )
 
     private val key = "ble_scan_always_enabled"
 

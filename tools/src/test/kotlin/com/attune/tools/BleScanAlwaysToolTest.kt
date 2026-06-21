@@ -1,19 +1,7 @@
 package com.attune.tools
 
-import com.attune.core.SettingsContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
-/** In-memory SettingsContext: lets the whole tool layer be tested without a device. */
-class FakeSettings : SettingsContext {
-    val global = mutableMapOf<String, String>()
-    override fun getSecure(key: String): String? = null
-    override fun putSecure(key: String, value: String) {}
-    override fun getGlobal(key: String): String? = global[key]
-    override fun putGlobal(key: String, value: String) { global[key] = value }
-    override fun getSystem(key: String): String? = null
-    override fun putSystem(key: String, value: String) {}
-}
 
 class BleScanAlwaysToolTest {
     @Test

@@ -13,6 +13,12 @@ interface ConfigTool {
     val id: String
     val requiredPermissions: List<String>     // e.g. listOf("android.permission.WRITE_SECURE_SETTINGS")
 
+    /**
+     * What the intent layer is told this tool can do. Grounds the LLM in real capabilities —
+     * the parser may only reference ids/params that appear here. The ToolRegistry collects these.
+     */
+    val descriptor: ToolDescriptor
+
     /** Pure description of what applying these params will do. No side effects. Powers the confirm sheet. */
     fun preview(params: Map<String, String>): String
 
