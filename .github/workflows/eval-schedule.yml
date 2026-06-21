@@ -1,0 +1,9 @@
+name: Intent Eval (nightly)
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+jobs:
+  call-eval:
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit

@@ -1,0 +1,17 @@
+{
+  "description": "Golden cases for the privacy-lockdown intent family. The eval harness asserts the parser maps each phrasing to (at least) these tool actions.",
+  "cases": [
+    {
+      "intent": "lock this down for travel",
+      "mustInclude": [
+        { "toolId": "privacy.ble_scan_always", "params": { "enabled": "false" } }
+      ]
+    },
+    {
+      "intent": "stop apps tracking me over bluetooth",
+      "mustInclude": [
+        { "toolId": "privacy.ble_scan_always", "params": { "enabled": "false" } }
+      ]
+    }
+  ]
+}

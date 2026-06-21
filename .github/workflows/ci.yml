@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Fast feedback: pure-JVM unit tests for core/ + tools/ (mocked SettingsContext).
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest
+
+  # Integration: instrumented tests on a real emulator. Proves settings actually change.
+  # NOTE (2026): Ubuntu runners + KVM are now faster & cheaper than macOS for emulator CI.
+  instrumented:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Instrumented tests on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          # Attune writes secure/global settings; grant the permission to the test apks,
+          # then run connected tests. Adjust the package id to match the build.
+          script: |
+            adb shell pm grant com.attune.app android.permission.WRITE_SECURE_SETTINGS || true
+            ./gradlew connectedCheck
+
+  # Intent-layer eval: is the LLM mapping intents to the right plan? Costs API calls,
+  # so it runs on a schedule / manual dispatch, not on every push. Needs ANTHROPIC_API_KEY secret.
+  intent-eval:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+      - name: Run intent eval harness
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: ./gradlew :core:intentEval   # reports pass-rate against core/src/test/resources/intents
