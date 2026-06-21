@@ -6,10 +6,10 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.attune.app.settings.AndroidSettingsContext
 import com.attune.app.settings.Permissions
 import com.attune.tools.WindowAnimationScaleTool
+import org.junit.Assert.assertEquals
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertEquals
 
 /**
  * Proves the thin "does it really write the setting" seam on a real Android system: a tool
@@ -40,10 +40,10 @@ class AnimationScaleInstrumentedTest {
 
         try {
             val snapshot = tool.apply(settings, mapOf("scale" to "0.0"))
-            assertEquals("0.0", Settings.Global.getString(resolver, key), "apply should write the real setting")
+            assertEquals("apply should write the real setting", "0.0", Settings.Global.getString(resolver, key))
 
             tool.revert(settings, snapshot)
-            assertEquals(original, Settings.Global.getString(resolver, key), "revert should restore the original")
+            assertEquals("revert should restore the original", original, Settings.Global.getString(resolver, key))
         } finally {
             // Defensive: never leave the device altered if an assertion throws mid-test.
             Settings.Global.putString(resolver, key, original)
