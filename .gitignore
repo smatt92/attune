@@ -19,3 +19,6 @@ captures/
 # Secrets
 *.env
 secrets.properties
+
+# Local environment (never commit keys)
+.env

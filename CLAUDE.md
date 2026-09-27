@@ -37,3 +37,16 @@ Three layers, hard boundaries:
 ## Conventions
 - Kotlin, JDK 17, Jetpack Compose for UI.
 - Keep `core` free of Android framework imports (pure Kotlin → fast JVM tests).
+
+## Checks
+
+Run from the repo root. JDK 17, matching CI. `:app` needs the Android SDK (ANDROID_HOME or local.properties).
+
+| Check | Command |
+|---|---|
+| Test | `./gradlew testDebugUnitTest` |
+| Intent eval | `./gradlew :core:intentEval` |
+| Lint | `./gradlew lintDebug` |
+| Build | `./gradlew assembleDebug` |
+
+Orchestration: follow ~/.claude/CLAUDE.md → Orchestration protocol (Jev).
