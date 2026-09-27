@@ -45,7 +45,7 @@ Run from the repo root. JDK 17, matching CI. `:app` needs the Android SDK (ANDRO
 | Check | Command |
 |---|---|
 | Test | `./gradlew testDebugUnitTest` |
-| Intent eval | `./gradlew :core:intentEval` |
+| Intent eval | `./gradlew :core:intentEval` (manual — needs ANTHROPIC_API_KEY, not a gate) |
 | Lint | `./gradlew lintDebug` |
 | Build | `./gradlew assembleDebug` |
 
